@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import * as he from 'he';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -20,7 +21,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Select all tables and extract the HTML of each table
     const tables = [];
     $('table').each((i, table) => {
-      tables.push($(table).html());
+      // Decode HTML entities
+      const decodedHtml = he.decode($(table).html() || '');
+      // Clean up excess whitespace
+      const cleanedHtml = decodedHtml.replace(/\s+/g, ' ').trim();
+      tables.push(cleanedHtml);
     });
 
     // Check if any tables were found
